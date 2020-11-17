@@ -2,9 +2,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 # serializers imports
 from rest_framework import status
+###  viewssets
+from rest_framework import viewsets
+# class 52
+from rest_framework.authentication import TokenAuthentication
 
 from profiles_api import serializers
-
+# class 48
+from profiles_api import models
+#  class 52
+from profiles_api import permissions
 
 class HelloApiView(APIView):
     """Test API View"""
@@ -54,3 +61,79 @@ class HelloApiView(APIView):
     def delete(self, request, pk=None):
         """Delete an object"""
         return Response({'method':'DELETE'})
+
+# views set that rest api provide
+class HelloViewSet(viewsets.ViewSet):
+    """Test API ViewSet"""
+
+    # we can share the same serializer
+    serializer_class=serializers.HelloSerializer
+
+    def list(self, request):
+        """ Return a hello message"""
+        a_viewset =[
+            'Uses actions (list, create, retrieve, update, partial_update )',
+            'Automatically maps to URLs using Routers',
+            'Provides more functionality with less code',
+        ]
+
+        return Response ({'message':'Hello!', 'a_viewset': a_viewset})
+
+
+    def create(self, request):
+        """ Create a new hello message"""
+        #  THE SERIALIZER CLASS IS specifIED IN THE Serializer.PY
+        serializer = serializers.HelloSerializer(data=request.data)
+
+        if serializer.is_valid():
+            name = serializer.validated_data.get('name')
+            message =f'Hello {name}!'
+            return Response({'message':message})
+        else:
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    #  retrieve a specific oject with pk
+    def retrieve(self, request, pk=None):
+        """Handles getting an object by its ID."""
+
+        return Response({'http_method': 'GET'})
+
+    def update(self, request, pk=None):
+        """Handles updating an object."""
+
+        return Response({'http_method': 'PUT'})
+
+    def partial_update(self, request, pk=None):
+        """Handles updating part of an object."""
+
+        return Response({'http_method': 'PATCH'})
+
+    def destroy(self, request, pk=None, primary_key=False):
+        """Handles removing an object"""
+
+        return Response({'http_method':'DELETE'})
+
+# the way you use a model view set is you connect it up to a
+# serializer class just like you would a regular view set and you provide a query
+# set to the model view set so it knows which objects in the database are going
+# to be managed through this view set
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    """" Handle creating and updating pofiles
+    The Django rest framework knows the standard functions that you would want to perform
+    on a model view set and that is the create function to create new items the
+    list function to list the models that are in the database
+    the update partial update and destroy to manage specific model objects in the
+    database Django rest framework takes care of all of this for us
+    just by assigning the serializer class to a model serializer
+    and the query set this is the great thing about the Model View set"""
+
+    serializer_class = serializers.UserProfileSerializer
+    queryset = models.UserProfile.objects.all()
+    # class 52
+    authentication_classes = (TokenAuthentication,)
+    # premission on profile, to see if the user have permissions
+    permission_classes = (permissions.UpdateOwnProfile,)
