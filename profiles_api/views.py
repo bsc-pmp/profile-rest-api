@@ -6,6 +6,8 @@ from rest_framework import status
 from rest_framework import viewsets
 # class 52
 from rest_framework.authentication import TokenAuthentication
+#  class 54
+from rest_framework import filters
 
 from profiles_api import serializers
 # class 48
@@ -137,3 +139,6 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     authentication_classes = (TokenAuthentication,)
     # premission on profile, to see if the user have permissions
     permission_classes = (permissions.UpdateOwnProfile,)
+    # class 54
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'email',)
