@@ -8,11 +8,18 @@ from rest_framework import viewsets
 from rest_framework.authentication import TokenAuthentication
 #  class 54
 from rest_framework import filters
+# class 55
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.settings import api_settings
+# class 65
+# from rest_framework.permissions import IsAuthenticatedOrReadOnly
+# class 67 - this block the user if is not authenticated
+from rest_framework.permissions import IsAuthenticated
 
 from profiles_api import serializers
 # class 48
 from profiles_api import models
-#  class 52
+#  class 52 - read only if user not authenticated
 from profiles_api import permissions
 
 class HelloApiView(APIView):
@@ -142,3 +149,36 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     # class 54
     filter_backends = (filters.SearchFilter,)
     search_fields = ('name', 'email',)
+
+class UserLoginApiView(ObtainAuthToken):
+    """Handle creating user authentication tokens"""
+    #  we need to adapt to be visibilie in the browser
+    renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+class UserProfileFeedViewSet(viewsets.ModelViewSet):
+    """Handles creating, reading and updating profile feed items"""
+    authentication_classes = (TokenAuthentication,)
+    # this set the serializer class to the profile feed in the serializar.property
+    serializer_class = serializers.ProfileFeedItemSerializer
+    # we're going to manage all of our profile feed item objects from our model in our view set
+    queryset = models.ProfileFeedItem.objects.all()
+    # class 65
+    permission_classes = (
+        permissions.UpdateOwnStatus,
+        IsAuthenticated,
+        # IsAuthenticatedOrReadOnly,
+    )
+
+    def perform_create(self, serializer):
+        """sets the user profile to the logged in user"""
+        # sets the user profile to the logged in user the perform create
+
+        # function is a handy feature of the Django rest framework that allows you to
+        # override the behavior or customize the behavior for creating objects through a
+        # Model View set so when a request gets made to our view set it gets passed into
+        # our serializer class and validated and then the serializer dot save function is
+        # called by default if we need to customize the logic for creating an
+        # object then we can do this using the perform create function so this perform
+        # create function gets called every time you do an HTTP POST to our view set
+
+        serializer.save(user_profile=self.request.user)
