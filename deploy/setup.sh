@@ -3,7 +3,7 @@
 set -e
 
 # TODO: Set to URL of git repo.
-PROJECT_GIT_URL='https://github.com/bsc-pmp/profile-rest-api.gitt'
+PROJECT_GIT_URL='https://github.com/bsc-pmp/profile-rest-api.git'
 
 # where we going to clone the project into the server
 PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api'
