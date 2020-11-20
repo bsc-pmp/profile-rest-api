@@ -3,12 +3,17 @@
 set -e
 
 # TODO: Set to URL of git repo.
-PROJECT_GIT_URL='https://github.com/bsc-pmp/profile-rest-api'
+PROJECT_GIT_URL='https://github.com/bsc-pmp/profile-rest-api.gitt'
 
-PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api/'
+# where we going to clone the project into the server
+PROJECT_BASE_PATH='/usr/local/apps/profiles-rest-api'
 
 echo "Installing dependencies..."
 apt-get update
+# sqlite - databases, git - clone the project, nginx, nginx is the webserver
+# that is going to serve the static files and act as a proxy to our uWSGI service that is
+# going to run in supervisor
+
 apt-get install -y python3-dev python3-venv sqlite python-pip supervisor nginx git
 
 # Create project directory
@@ -28,7 +33,7 @@ cd $PROJECT_BASE_PATH
 $PROJECT_BASE_PATH/env/bin/python manage.py migrate
 $PROJECT_BASE_PATH/env/bin/python manage.py collectstatic --noinput
 
-# Configure supervisor - application linux allows you to manage processes
+# Configure supervisor
 cp $PROJECT_BASE_PATH/deploy/supervisor_profiles_api.conf /etc/supervisor/conf.d/profiles_api.conf
 supervisorctl reread
 supervisorctl update
